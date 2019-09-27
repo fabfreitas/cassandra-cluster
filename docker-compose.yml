@@ -1,0 +1,76 @@
+version: "3.7"
+
+services:
+  cassandra-seed:
+    container_name: cassandra-seed
+    image: cassandra:3.11.4
+    ports:
+      - "7000:7000"
+      - "9042:9042"   # Native transport
+      - "7199:7199"   # JMX
+      - "9160:9160"   # Thrift clients
+    deploy:
+      resources:
+        limits:
+          memory: 4096M
+    volumes:
+      - type: volume
+        source: data-seed
+        target: /var/lib/cassandra
+        consistency: cached
+    environment:
+      - "CASSANDRA_SEEDS=cassandra-seed"
+      - "CASSANDRA_CLUSTER_NAME=Cassandra Cluster"
+      - "CASSANDRA_DC=cassandraDC1"
+      - "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch"
+    restart: always
+
+  cassandra1:
+    container_name: cassandra-node-1
+    image: cassandra:3.11.4
+    deploy:
+      resources:
+        limits:
+          memory: 3192M
+    volumes:
+      - type: volume
+        source: data-node-1
+        target: /var/lib/cassandra
+        consistency: cached
+    environment:
+      - "CASSANDRA_SEEDS=cassandra-seed"
+      - "CASSANDRA_CLUSTER_NAME=Cassandra Cluster"
+      - "CASSANDRA_DC=cassandraDC1"
+      - "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch"
+    depends_on:
+      - cassandra-seed
+    restart: always
+
+  cassandra2:
+    container_name: cassandra-node-2
+    image: cassandra:3.11.4
+    deploy:
+      resources:
+        limits:
+          memory: 3192M
+    volumes:
+      - type: volume
+        source: data-node-2
+        target: /var/lib/cassandra
+        consistency: cached
+    environment:
+      - "CASSANDRA_SEEDS=cassandra-seed"
+      - "CASSANDRA_CLUSTER_NAME=Cassandra Cluster"
+      - "CASSANDRA_DC=cassandraDC1"
+      - "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch"
+    depends_on:
+      - cassandra-seed
+    restart: always
+
+volumes:
+  data-seed:
+  data-node-1:
+  data-node-2: 
+    
+      
+  
